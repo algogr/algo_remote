@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Remote</class>
+ <widget class="QDialog" name="Remote">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Algo Remote</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="remote.qrc">
+    <normaloff>:/favicon64-2.png</normaloff>:/favicon64-2.png</iconset>
+  </property>
+  <property name="windowOpacity">
+   <double>1.000000000000000</double>
+  </property>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources>
+  <include location="remote.qrc"/>
+ </resources>
+ <connections/>
+</ui>

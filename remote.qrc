@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>favicon.ico</file>
+        <file>algologo-1.png</file>
+        <file>favicon64-2.png</file>
+    </qresource>
+</RCC>
