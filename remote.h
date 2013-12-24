@@ -2,6 +2,7 @@
 #define REMOTE_H
 
 #include <QDialog>
+#include <QDebug>
 
 namespace Ui {
 class Remote;
@@ -17,6 +18,10 @@ public:
     
 private:
     Ui::Remote *ui;
+    bool rdp_state;
+
+private slots:
+    void enable_disable_rdp();
 };
 
 #endif // REMOTE_H
