@@ -19,9 +19,11 @@ public:
 private:
     Ui::Remote *ui;
     bool rdp_state;
+    QString get_free_port();
 
 private slots:
     void enable_disable_rdp();
+    void create_tunnel();
 };
 
 #endif // REMOTE_H

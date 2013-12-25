@@ -9,7 +9,9 @@ Remote::Remote(QWidget *parent) :
 {
     ui->setupUi(this);
     rdp_state=FALSE;
+    ui->label->setVisible(FALSE);
     connect (ui->pushButton,SIGNAL(released()),this,SLOT(enable_disable_rdp()));
+    connect (ui->pushButton_2,SIGNAL(released()),this,SLOT(create_tunnel()));
 
 }
 
@@ -43,4 +45,28 @@ void Remote::enable_disable_rdp()
     }
 
     Process->start(script,args);
+}
+
+void Remote::create_tunnel()
+{
+    QString port=get_free_port();
+    ui->label->setText(port);
+    ui->label->setVisible(TRUE);
+}
+
+QString Remote::get_free_port()
+{
+    QProcess *Process=new QProcess;
+    QString script = QDir::currentPath()+ "/plink.exe blackcat -l jim -pw dn1111";
+    QString port;
+    Process->start(script);
+    qDebug()<<script;
+    Process->waitForFinished(-1);
+    QByteArray out = Process->readAllStandardOutput();
+    for (int i=0;i<=sizeof(out);++i)
+    {
+        port=port+out[i];
+    }
+    return port;
+
 }
