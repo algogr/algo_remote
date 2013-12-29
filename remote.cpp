@@ -1,72 +1,112 @@
 #include "remote.h"
 #include "ui_remote.h"
-#include "QProcess"
-#include "QDir"
+
 
 Remote::Remote(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Remote)
 {
     ui->setupUi(this);
-    rdp_state=FALSE;
+    settingsFile = (QDir::currentPath()+ "/remote.ini");
+    QSettings settings(settingsFile,QSettings::IniFormat);
+    sshServer=settings.value("sshServer").toString();
+    sshUser=settings.value("sshUser").toString();
+    sshPwd=settings.value("sshPwd").toString();
+    sshCommand=settings.value("sshCommand").toString();
+    rdpState=FALSE;
     ui->label->setVisible(FALSE);
-    connect (ui->pushButton,SIGNAL(released()),this,SLOT(enable_disable_rdp()));
-    connect (ui->pushButton_2,SIGNAL(released()),this,SLOT(create_tunnel()));
+    noofProcs=0;
+    connect (ui->pushButton,SIGNAL(released()),this,SLOT(enabledisableRdp()));
+    connect (ui->pushButton_2,SIGNAL(released()),this,SLOT(createTunnel()));
 
 }
 
 Remote::~Remote()
 {
+    //Delete plink running processes and free the server
+    if (noofProcs>0)
+    {
+    for (int i=0;i<noofProcs;++i)
+    {
+        delete runningProcs[i];
+    }
+    }
+
     delete ui;
+
 }
 
-void Remote::enable_disable_rdp()
+void Remote::enabledisableRdp()
 {
     QProcess *Process=new QProcess;
-    //QString file = QDir::homePath() + "ts_disable.vbs";
-    //QString file1 = QDir::currentPath() + "/ts_disable.vbs";
-    //qDebug() << file << file1;
-    //process.start(file);
-    //process.execute(file); //i tried as well
-    //system("start /ts_disable.vbs");
+
+    //CScript is needed to execute VBS code
     QString script = "cscript";
     QStringList args;
-    if (rdp_state==TRUE)
+    if (rdpState==TRUE)
     {
         args<<QString(QDir::currentPath()+ "/ts_disable.vbs")<<"//NoLogo";
         ui->pushButton->setText("ENABLE RDP");
-        rdp_state=FALSE;
+        rdpState=FALSE;
     }
     else
     {
         args<<QString(QDir::currentPath()+ "/ts_enable.vbs")<<"//NoLogo";
         ui->pushButton->setText("DISABLE RDP");
-        rdp_state=TRUE;
+        rdpState=TRUE;
     }
 
     Process->start(script,args);
 }
 
-void Remote::create_tunnel()
+void Remote::createTunnel()
 {
-    QString port=get_free_port();
-    ui->label->setText(port);
+    QString port=getFreePort();
     ui->label->setVisible(TRUE);
+    if (port==0)
+    {
+        ui->label->setText("No ports available...");
+        return;
+    }
+    else
+        ui->label->setText(port);
+
+
+    remoteForward(port);
+    return;
+
+
 }
 
-QString Remote::get_free_port()
+QString Remote::getFreePort()
 {
     QProcess *Process=new QProcess;
-    QString script = QDir::currentPath()+ "/plink.exe blackcat -l jim -pw dn1111";
+    QString script = QDir::currentPath()+ "/plink.exe -ssh "+sshServer+ \
+            " -l "+sshUser+" -pw "+sshPwd +" "+sshCommand;
     QString port;
     Process->start(script);
     qDebug()<<script;
     Process->waitForFinished(-1);
     QByteArray out = Process->readAllStandardOutput();
-    for (int i=0;i<=sizeof(out);++i)
+    for (int i=0;i<=sizeof(out);i++)
     {
+        qDebug()<<i<<out[i];
         port=port+out[i];
     }
+    delete Process;
     return port;
 
+}
+
+
+void Remote::remoteForward(QString port)
+{
+    QProcess *Process=new QProcess;
+    runningProcs[noofProcs]=Process;
+    QString script = QDir::currentPath()+ "/plink.exe -R "+port+":localhost:3389 -ssh "+ sshServer+" -l "+sshUser+" -pw "+sshPwd;
+    Process->start(script);
+    qDebug()<<script;
+    ++noofProcs;
+
+    return;
 }

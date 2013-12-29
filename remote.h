@@ -3,7 +3,9 @@
 
 #include <QDialog>
 #include <QDebug>
-
+#include "QProcess"
+#include "QDir"
+#include <QSettings>
 namespace Ui {
 class Remote;
 }
@@ -18,12 +20,20 @@ public:
     
 private:
     Ui::Remote *ui;
-    bool rdp_state;
-    QString get_free_port();
+    bool rdpState;
+    QProcess *runningProcs[10];
+    QString getFreePort();
+    void remoteForward(QString port);
+    int noofProcs;
+    QString settingsFile;
+    QString sshServer;
+    QString sshUser;
+    QString sshPwd;
+    QString sshCommand;
 
 private slots:
-    void enable_disable_rdp();
-    void create_tunnel();
+    void enabledisableRdp();
+    void createTunnel();
 };
 
 #endif // REMOTE_H
